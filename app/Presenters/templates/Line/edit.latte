@@ -1,0 +1,15 @@
+{block content}
+    {if $user->isInRole('admin')}
+        <ul class="navig">
+	        {if $user->loggedIn and $user->isInRole('admin')}<li><a n:href="Line:add">Add new line</a></li>{/if}
+	        <li><a n:href="Homepage:">Lines overview</a></li>
+            <li><a n:href="Homepage:matrix">Matrix view</a></li>
+	        <li><a n:href="Homepage:grid">Grid view</a></li>
+        </ul>
+        <h1>Edit line:</h1>  
+        {control editLineForm}
+    {else}
+        <h1>Only admin user can edit line.</h1>
+    {/if}
+{/block}
+

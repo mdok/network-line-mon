@@ -1,0 +1,37 @@
+{define default}
+	<div class="heading">
+		<h1 n:block="title">Device overview</h1>
+		<div class="search">
+			<button class="cancel-search">cancel</button>
+			<input class="search-input" type="text" name="search" placeholder="Search...">
+
+		</div>
+	</div>
+	<div class="container devices-overview">
+		<div class="container-header">
+			<div>Hostname:</div>
+			<div>IP address:</div>
+			<div>OS:</div>
+		</div>
+
+		{foreach $devices as $device}
+			<div class="device">
+				<div>{if $user->loggedIn}<a n:href="Device:show $device->device_id">{$device->hostname}</a>{/if}</div>
+				<div>{$device->device_ip}</div>
+				<div>{$device->image_ver}</div>
+			</div>
+		{/foreach}
+	</div>
+{/define}
+
+{define defaultNoDevices}
+ 	<h2>No devices to show</h2>
+{/define}
+
+{block content}
+	{if count($devices)>0}
+		{include #default}
+	{else}
+		{include #defaultNoDevices}	
+	{/if} 
+{/block}

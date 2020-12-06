@@ -1,0 +1,9 @@
+{block content}
+    {if $user->isInRole('admin')}
+        <p><a n:href="User:default">← Back to users</a></p>
+        <h1>Create new user</h1>
+        {control createUserForm}
+    {else}
+        <h1>Only admin user can create new user.</h1>
+    {/if}
+{/block}

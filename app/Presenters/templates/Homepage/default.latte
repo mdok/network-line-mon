@@ -1,0 +1,50 @@
+{define default}
+	<div class="heading">
+		<h1 n:block="title">Lines overview</h1>
+		<div class="search">
+			<button class="cancel-search">cancel</button>
+			<input class="search-input" type="text" name="search" autocomplete="on" placeholder="Search...">
+
+		</div>
+	</div>
+	{ifset $lines}
+		<div class="container lines-overview">
+			<div class="container-header">
+				<div>Line ID</div>
+				<div>Operation type</div>
+				<div>Description</div>
+				<div>Device source</div>
+				<div>Device responder</div>
+				<div>Operation number</div>
+			</div>
+			{foreach $lines as $line}
+				<div class="line">
+					<div>{if $user->loggedIn}<a n:href="Line:show $line->line_id">{$line->line_id}</a>{/if}</div>
+					<div>{$types[$line->sla_oper_type]}</div>
+					<div>{$line->line_description}</div>
+					<div>{if $user->loggedIn}<a n:href="Device:show $line->device_source">{$linesToDevices[$line->line_id]['source']}</a>{/if}</div>
+					<div>{if $user->loggedIn}<a n:href="Device:show $line->device_responder">{$linesToDevices[$line->line_id]['responder']}</a>{/if}</div>
+					<div>{$line->sla_oper_number}</div>
+			</div>
+			{/foreach}
+		</div>
+	{/ifset}
+{/define}
+
+{define defaultNoLines}
+	<h1>No lines to show</h1>
+{/define}
+
+{block content}
+	<ul class="navig">
+		{if $user->loggedIn and $user->isInRole('admin')}<li><a n:href="Line:add">Add new line</a></li>{/if}
+		<li><a n:href="Homepage:">Lines overview</a></li>
+		<li><a n:href="Homepage:matrix">Matrix view</a></li>
+		<li><a n:href="Homepage:grid">Grid view</a></li>
+	</ul>
+	{ifset $lines}
+		{include #default}
+	{else}
+		{include #defaultNoLines}	
+	{/ifset} 
+{/block}

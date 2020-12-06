@@ -1,0 +1,22 @@
+{block content}
+	{ifset $users}
+		<ul class="navig">
+			<li>{if $user->loggedIn}<a n:href="User:create">Create user</a>{/if}</li>
+		</ul>
+		<h1 n:block="title">Users</h1>
+		<div class="container-users">
+			<div class="container-header-users">
+				<div>Username:</div>
+				<div>Role:</div>
+			</div>
+			{foreach $users as $userItem}
+				<div class="user">
+					<div>{$userItem->username}</div>
+					<div>{$userItem->role}</div>
+        			{if $user->loggedIn}<a n:href="User:edit $userItem->user_id">Edit{/if}</a>
+        			{if $user->loggedIn}<a onclick="return confirm('Are you sure you want to delete this user?');" n:href="delete! $userItem->user_id">Delete</a>{/if}
+				</div>
+			{/foreach}
+		</div>
+	{/ifset}
+{/block}

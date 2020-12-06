@@ -1,0 +1,4 @@
+database:
+        dsn: 'pgsql:host=127.0.0.1;port=5432;dbname=nlm'
+        user: nlm
+        password: nlm

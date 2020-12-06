@@ -1,0 +1,221 @@
+{define lineAlerts}
+    {ifset $line_alerts}
+        {snippet lineAlerts}
+            <div class="container-line-alerts">
+                <h3>Current alerts for line:</h3>    
+                {if count($line_alerts)>0}
+                    <div class="alert">
+                        <div n:foreach="$line_alerts as $alert">{$alert}</div>
+                    </div>
+                    <div class="pagination">
+	                    {if !$lineAlertsPaginator->isFirst()}
+		                    <a n:href="redrawLineAlerts!, 0">1</a>
+		                    &nbsp;|&nbsp;
+		                    <a n:href="redrawLineAlerts!, $lineAlertsPaginator->page-1">&lt;</a>
+		                    &nbsp;|&nbsp;
+	                    {/if}
+
+	                    {$lineAlertsPaginator->getPage()+1}/{$lineAlertsPaginator->getPageCount()}
+
+	                    {if !$lineAlertsPaginator->isLast()}
+		                    &nbsp;|&nbsp;
+		                    <a n:href="redrawLineAlerts!, $lineAlertsPaginator->getPage() + 1">&gt;</a>
+		                    &nbsp;|&nbsp;
+		                    <a n:href="redrawLineAlerts!, $lineAlertsPaginator->getPageCount()">{$lineAlertsPaginator->getPageCount()}</a>
+	                    {/if}
+                    </div>
+                {else}
+                    <div class="alert">
+                        <div>No alerts for line.</div>
+                    </div>
+                {/if}
+            </div>
+        {/snippet}
+    {/ifset}
+{/define}
+
+{define deviceAlerts}
+    {ifset $device_alerts}
+        {snippet deviceAlerts}
+            <div class="container-device-alerts">
+                <h3>Current alerts for line source device:</h3>
+                {if count($device_alerts)>0}
+                    <div class="alert">
+                        <div n:foreach="$device_alerts as $alert">{$alert}</div>
+                    </div>
+                    <div class="pagination">
+	                    {if !$deviceAlertsPaginator->isFirst()}
+		                    <a n:href="redrawDeviceAlerts!, 0">1</a>
+		                    &nbsp;|&nbsp;
+		                    <a n:href="redrawDeviceAlerts!, $deviceAlertsPaginator->page-1">&lt;</a>
+		                    &nbsp;|&nbsp;
+	                    {/if}
+
+	                    {$deviceAlertsPaginator->getPage()+1}/{$deviceAlertsPaginator->getPageCount()}
+
+	                    {if !$deviceAlertsPaginator->isLast()}
+		                    &nbsp;|&nbsp;
+		                    <a n:href="redrawDeviceAlerts!, $deviceAlertsPaginator->getPage() + 1">&gt;</a>
+		                    &nbsp;|&nbsp;
+		                    <a n:href="redrawDeviceAlerts!, $deviceAlertsPaginator->getPageCount()">{$deviceAlertsPaginator->getPageCount()}</a>
+	                    {/if}
+                    </div>
+                {else}
+                    <div class="alert">
+                        <div>No alerts for source device.</div>
+                    </div>
+                {/if}
+            </div>
+        {/snippet}
+    {/ifset}
+{/define}
+
+{block content}
+    <ul class="navig">
+	    {if $user->loggedIn and $user->isInRole('admin')}<li><a n:href="Line:add">Add new line</a></li>{/if}
+	    <li><a n:href="Homepage:">Lines overview</a></li>
+        <li><a n:href="Homepage:matrix">Matrix view</a></li>
+	    <li><a n:href="Homepage:grid">Grid view</a></li>
+    </ul>
+
+    <p><a n:href="Homepage:default">← back to lines overview</a></p>
+
+
+    <div class="container-line-detail-row">
+        <div class="container-line-detail-info">
+            <h1 n:block="title">Line detail: {$line->line_id}</h1>
+            <div><label>Description: </label>{$line->line_description}</div>
+            <div><label>Operation type: </label>{$types[$line->sla_oper_type]}</div>
+            <div><label>Operation number: </label>{$line->sla_oper_number}</div>
+            <div>{if $user->loggedIn} <label>Source: </label><a n:href="Device:show $deviceA->device_id">{$deviceA->hostname}</a>{/if}</div>
+            <div>{if $user->loggedIn} <label>Responder: </label><a n:href="Device:show $deviceB->device_id">{$deviceB->hostname}</a>{/if}</div>
+            <div class="container-line-detail-controls">
+                {if $user->loggedIn and $user->isInRole('admin')}<a n:href="edit $line->line_id">Edit</a>{/if}
+                {if $user->loggedIn and $user->isInRole('admin')}<a onclick="return confirm('Are you sure you want to delete this line?');" n:href="delete $line->line_id">Delete</a>{/if}
+            </div>
+        </div>
+
+        {if $line->poll==1}
+            {snippet alerts}
+                <div class="container-alerts">
+                    {include #lineAlerts}   
+                    {include #deviceAlerts}
+                </div>
+            {/snippet}
+        {/if}
+
+    </div>
+
+    {if $line->sla_oper_type == 2 and $line->poll==1 }
+        <button class="scroll-up">&and;</button>
+        <div class="container-slas-overview">
+            <h3>All SLA's overview:</h3>
+            <div class="container-slas">
+                {foreach $slas as $slaKey => $slaVal}
+                    <a class="{$slaKey} sla-overview" href="#{$aliases[$slaKey]}">{$aliases[$slaKey]}</a>
+                {/foreach}
+            </div>
+        </div>
+    {/if}
+
+    <div class="container-select">
+        <h2> Line SLA's last: </h2>
+        <select class="ajax interval-select">
+            <option selected>6h</option>
+            <option>24h</option>
+            <option>48h</option>
+        </select>
+        <a class="ajax refresh" n:href="refresh!">Refresh</a>
+        <a class="ajax redraw-graphs" n:href="redrawGraphs!">Redraw graphs</a>
+    </div>
+
+    {snippet sla}
+
+
+        {if $line->poll==1}
+
+            <div class="sla">
+                {if $line->sla_oper_type == 2}
+
+                    {foreach $slas as $slaKey => $slaVal}
+                        <div class="container-line-detail-sla-row">
+                            <div class="container-line-detail-graph">
+                                <div id="{$aliases[$slaKey]}" class="{$slaKey}">{$aliases[$slaKey]}: {$slaVal}</div>
+                                {ifset $lineGraphs[$slaKey]} 
+                                    <img class="{$slaKey} sla-graph" src="{$lineGraphs[$slaKey]|datastream}" alt="{$aliases[$slaKey]}">
+                                {/ifset}
+                            </div>
+                            <div class="container-line-detail-threshold">
+                                {if !empty($thresholds[$slaKey])}
+                                    <div class="container-line-detail-threshold-values">
+                                        <div class="threshold-header">Thresholds SLA {$aliases[$slaKey]}:</div>
+                                        <div class="threshold-values">
+                                            <div class="thresholds {$slaKey} min"><label>MIN: </label>{$thresholds[$slaKey]['min']}</div>
+                                            <div class="thresholds {$slaKey} exact"><label>EXACT: </label>{$thresholds[$slaKey]['exact']}</div>
+                                            <div class="thresholds {$slaKey} max"><label>MAX: </label>{$thresholds[$slaKey]['max']}</div>
+                                        </div>
+                                    </div>
+                                    {if $thresholds[$slaKey]['over_threshold'] === 't'}
+                                        <div class="over-threshold"> OVER THRESHOLD </div>
+                                    {/if}
+                                    <div class="container-line-detail-threshold-controls">
+                                        {if $user->loggedIn and $user->isInRole('admin')}<a n:href="editThreshold, $line->line_id, sla_type => $slaKey">Edit</a>{/if}
+                                         {if $user->loggedIn and $user->isInRole('admin')}<a onclick="return confirm('Are you sure you want to delete this threshold?');" n:href="deleteThreshold! $line->line_id,$slaKey">Delete</a>{/if}
+                                    </div>
+                                {else}
+                                    <div class="threshold-header">Thresholds SLA {$aliases[$slaKey]}:</div>
+                                    <div class="container-line-detail-threshold-controls">
+                                        {if $user->loggedIn and $user->isInRole('admin')}<a n:href="editThreshold, $line->line_id, sla_type => $slaKey">Add</a>{/if}
+                                    </div>
+                                {/if}
+                            </div>
+                        </div> 
+                    {/foreach}
+                {/if}
+
+
+                {if $line->sla_oper_type == 1}
+                    <div class="container-line-detail-sla-row">
+                        <div class="container-line-detail-graph">
+                            <div id="rtt_avg" class="rtt_avg">RTT[avg]: {$slas['rtt_avg']}</div>
+                            <img class="rtt_avg sla-graph" src="{$lineGraph|dataStream}" alt="rtt_avg">
+                        </div>
+    
+                        <div class="container-line-detail-threshold">
+                            {if !empty($thresholds['rtt_avg'])}
+                                <div class="container-line-detail-threshold-values">
+                                    <div class="threshold-header">Thresholds SLA RTT[avg]:</div>
+                                    <div class="threshold-values">
+                                        <div class="thresholds rtt_avg min"><label>MIN: </label>{$thresholds['rtt_avg']['min']}</div>
+                                        <div class="thresholds rtt_avg exact"><label>EXACT: </label>{$thresholds['rtt_avg']['exact']}</div>
+                                        <div class="thresholds rtt_avg max"><label>MAX: </label>{$thresholds['rtt_avg']['max']}</div>
+                                    </div>
+                                </div>   
+                                {if $thresholds['rtt_avg']['over_threshold'] === 't'}
+                                    <div> OVER THRESHOLD </div>
+                                {/if}
+                                <div class="container-line-detail-threshold-controls">
+                                    {if $user->loggedIn and $user->isInRole('admin')}<a n:href="editThreshold, $line->line_id, sla_type => rtt_avg">Edit</a>{/if}
+                                    {if $user->loggedIn and $user->isInRole('admin')}<a onclick="return confirm('Are you sure you want to delete this threshold?');" n:href="deleteThreshold! $line->line_id,rtt_avg">Delete</a>{/if}
+                                </div>
+                            {else}
+                                <div class="threshold-header">Thresholds SLA RTT[avg]:</div>
+                                <div class="container-line-detail-threshold-controls">
+                                    {if $user->loggedIn and $user->isInRole('admin')}<a n:href="editThreshold, $line->line_id, sla_type => rtt_avg">Add</a>{/if}
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+                {/if}
+
+            </div>
+        {/if}
+
+    {/snippet}
+
+    {if $line->poll==0}
+        <h2>Poll for this line is disabled.</h2>
+    {/if}
+    <script type="text/javascript" src="{$basePath}/js/line.js"></script>
+
+{/block}

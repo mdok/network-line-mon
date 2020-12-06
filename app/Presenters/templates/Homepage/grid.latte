@@ -1,0 +1,111 @@
+{define lineAlerts}
+    {snippet lineAlerts}
+    <div class="container-alerts-allLines">
+        <h2>Current alerts:</h2>
+        {if count($line_alerts)>0}
+            <div class="alert">
+                <div n:foreach="$line_alerts as $alert">{$alert}</div>
+            </div>
+            <div class="pagination">
+	            {if !$lineAlertsPaginator->isFirst()}
+		            <a n:href="redrawLineAlerts!, 1">1</a>
+		            &nbsp;|&nbsp;
+		            <a n:href="redrawLineAlerts!, $lineAlertsPaginator->page-1">&lt;</a>
+		            &nbsp;|&nbsp;
+	            {/if}
+
+	            {$lineAlertsPaginator->getPage()}/{$lineAlertsPaginator->getPageCount()}
+
+	            {if !$lineAlertsPaginator->isLast()}
+		            &nbsp;|&nbsp;
+		            <a n:href="redrawLineAlerts!, $lineAlertsPaginator->getPage() + 1">&gt;</a>
+		            &nbsp;|&nbsp;
+		            <a n:href="redrawLineAlerts!, $lineAlertsPaginator->getPageCount()">{$lineAlertsPaginator->getPageCount()}</a>
+	            {/if}
+            </div>
+        {else}
+            <div class="alert">
+                <div>No alerts to show.</div>
+            </div>
+        {/if}
+    </div>
+    {/snippet}
+{/define}
+
+{define grid}
+    <button class="filter-echo">Echo</button>
+    <button class="filter-jitter">Jitter</button>
+    <a class="ajax refresh" n:href="refresh!">Refresh</a>
+    <a class="ajax save-grid" n:href="saveGrid!">Save grid</a>
+
+    {snippet sla}
+
+        <div class="grid">
+	        {foreach $lines as $line}
+                {if $line->poll===1}
+                    <div class="data-point {$line->line_id} type-{$line->sla_oper_type}">
+		                <div>
+                            {if $user->loggedIn}<a n:href="Line:show $line->line_id">{$line->line_id}: </a>{/if}
+                            {if $line->sla_oper_type===2}<button class="edit-sla" id="{$line->line_id}">&#9998;</button>{/if}
+                        </div>
+                        <div><label>Num.: </label>{$line->sla_oper_number}</div>
+                        <div><label>{$devices[$line->device_source]['hostname']} => {$devices[$line->device_responder]['hostname']}</label></div>
+                        <div class="sla-block">
+                            {if $line->sla_oper_type===2}
+                                {foreach $linesToSlas[$line->line_id] as $lineSlaKey => $lineSlaValue}
+                                    <div class="sla-thresh-pair">
+                                        <div class="sla {$line->line_id} {$lineSlaKey}"><label>{$aliases[$lineSlaKey]}: </label><div class="values">{$lineSlaValue}</div></div>
+                                            <div class="threshold {$line->line_id} {$lineSlaKey}">
+                                                {ifset $linesToThresholds[$line->line_id][$lineSlaKey]} 
+                                                    {if $linesToThresholds[$line->line_id][$lineSlaKey]['over_min'] === true}<div><label>&gt;</label>{$linesToThresholds[$line->line_id][$lineSlaKey]['min']}</div>{/if}
+                                                    {if $linesToThresholds[$line->line_id][$lineSlaKey]['over_exact'] === true}<div><label>=</label>{$linesToThresholds[$line->line_id][$lineSlaKey]['exact']}</div>{/if}
+                                                    {if $linesToThresholds[$line->line_id][$lineSlaKey]['over_max'] === true}<div><label>&lt;</label>{$linesToThresholds[$line->line_id][$lineSlaKey]['max']}</div>{/if}
+                                                {/ifset}
+                                            </div>
+                                    </div>        
+                                {/foreach}
+                            {else}
+                                <div class="sla-thresh-pair">
+                                    <div class="sla rtt_avg"><label>RTT[avg]: </label><div class="values">{$linesToSlas[$line->line_id]['rtt_avg']}</div></div>
+                                    <div class="threshold {$line->line_id} rtt_avg echo">
+                                        {ifset $linesToThresholds[$line->line_id]['rtt_avg']} 
+                                            {if $linesToThresholds[$line->line_id]['rtt_avg']['over_min'] === true}<div><label>&gt;</label>{$linesToThresholds[$line->line_id]['rtt_avg']['min']}</div>{/if}
+                                            {if $linesToThresholds[$line->line_id]['rtt_avg']['over_exact'] === true}<div><label>=</label>{$linesToThresholds[$line->line_id]['rtt_avg']['exact']}</div>{/if}
+                                            {if $linesToThresholds[$line->line_id]['rtt_avg']['over_max'] === true}<div><label>&lt;</label>{$linesToThresholds[$line->line_id]['rtt_avg']['max']}</div>{/if}
+                                        {/ifset}
+                                    </div>
+                                </div>
+                            {/if}
+                        </div>        
+	                </div>
+                {/if}
+	        {/foreach}
+        </div>
+        {include #lineAlerts}
+
+        </div>
+    {/snippet}
+    <div class="modal-edit-form"></div>
+    
+    <script type="text/javascript" src="{$basePath}/js/grid.js"></script>
+{/define}
+
+{define gridNoLines}
+    <h1>No lines to show</h1>
+{/define}
+
+{block content}
+	<ul class="navig">
+		{if $user->loggedIn and $user->isInRole('admin')}<li><a n:href="Line:add">Add new line</a></li>{/if}
+		<li><a n:href="Homepage:">Lines overview</a></li>
+        <li><a n:href="Homepage:matrix">Matrix view</a></li>
+		<li><a n:href="Homepage:grid">Grid view</a></li>
+	</ul>
+    <h1 n:block="title">Lines Grid View</h1>
+
+    {ifset $lines}
+        <div class="container-gridview-row">
+            {include #grid}
+        </div>
+    {/ifset}
+{/block}

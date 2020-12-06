@@ -1,0 +1,98 @@
+
+{define deviceAlerts}
+	{snippet deviceAlerts}
+		<div class="container-device-alerts">
+			<h3>Current alerts device:</h3>
+			{if count($device_alerts)>0}
+				<div class="alert">
+					<div n:foreach="$device_alerts as $alert">{$alert}</div>
+				</div>
+
+			<div class="pagination">
+				{if !$deviceAlertsPaginator->isFirst()}
+					<a n:href="redrawDeviceAlerts!, 0">1</a>
+					&nbsp;|&nbsp;
+					<a n:href="redrawDeviceAlerts!, $deviceAlertsPaginator->page-1">&lt;</a>
+					&nbsp;|&nbsp;
+				{/if}
+
+				{$deviceAlertsPaginator->getPage()+1}/{$deviceAlertsPaginator->getPageCount()}
+
+				{if !$deviceAlertsPaginator->isLast()}
+					&nbsp;|&nbsp;
+					<a n:href="redrawDeviceAlerts!, $deviceAlertsPaginator->getPage() + 1">&gt;</a>
+					&nbsp;|&nbsp;
+					<a n:href="redrawDeviceAlerts!, $deviceAlertsPaginator->getPageCount()">{$deviceAlertsPaginator->getPageCount()}</a>
+				{/if}
+			</div>
+			{else}
+		 		<div class="alert">
+            		<div>No alerts for device.</div>
+        		</div>
+    		{/if}
+		</div>
+	{/snippet}
+{/define}
+
+{block content}
+
+	<p><a n:href="Device:">← back to devices overview</a></p>
+
+	<div class="container-device-detail-row">
+
+		<div class="container-device-detail-info">
+			<h1 n:block="title">Device detail: {$device->device_id}</h1>
+			<div><label>Hostname: </label>{$device->hostname}</div>
+			<div><label>IP: </label>{$device->device_ip}</div>
+			<div><label>System desc.: </label>{$device->sys_description}</div>
+			<div><label>Image info: </label>{$device->image_info}</div>
+			<div><label>Image version: </label>{$device->image_ver}</div>
+			<div><label>Device type: </label>{$device->device_type}</div>
+			<div><label>Feature set: </label>{$device->feature_set}</div>
+			<div class="container-device-detail-controls">{if $user->loggedIn and $user->isInRole('admin')}<a onclick="return confirm('Are you sure you want to delete this device?');" n:href="delete $device->device_id, $device->hostname">Delete device</a>{/if}</div>
+
+		</div>
+
+		<div class="container-device-detail-column">
+			{snippet alerts}
+				<div class="container-alerts">
+					{include #deviceAlerts}
+				</div>
+			{/snippet}
+
+			<div class="container-asoc-lines">
+				<h3>Associated lines:</h3>
+				<div class="lines">
+					{foreach $lines as $line}
+						<div class="line">
+							<div>
+								{if $user->loggedIn}<a n:href="Line:show $line->line_id">{$line->line_id}:</a>{/if}
+								{$line->line_description}
+							</div>
+						</div>
+					{/foreach}
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="container-select">
+		<h2>Device CPU last: </h2>
+		<select class="ajax interval-select">
+    		<option selected>6h</option>
+    		<option>24h</option>
+    		<option>48h</option>
+		</select>
+	</div>
+	<a class="ajax refresh" n:href="refresh!">Refresh</a>
+	<a class="ajax redraw-graphs" n:href="redrawGraphs!">Redraw graphs</a>
+	<div class="container-device-cpu-row">
+		{snippet cpu}
+			<h2>Current CPU: {$device_stats->cpu_last_min}%</h2>
+			<img src="{$stat_graph|dataStream}" alt="cpu">
+		{/snippet}
+	</div>
+	<script type="text/javascript" src="{$basePath}/js/device.js"></script>
+
+{/block}

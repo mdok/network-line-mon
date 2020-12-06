@@ -1,0 +1,15 @@
+{block content}
+    {ifset $userItem}
+        <p><a n:href="Homepage:default">← back to lines overview</a></p>
+        <h1 n:block="title">Account detail</h1>
+        <div class="container-userdetail">
+            <div><label>Username: </label>{$userItem->username}</div>
+            <div><label>Role: </label>{$userItem->role}</div>
+        </div>
+        <div class="container-controls-userdetail">
+            <div>{if $user->loggedIn}<a onclick="return confirm('Are you sure you want to delete this user?');" n:href="delete! $userItem->user_id">Delete</a>{/if}</div>
+            <div>{if $user->loggedIn}<a n:href="User:changePassword $userItem->user_id">Change password</a>{/if}</div>
+        </div>
+    {/ifset}
+{/block}
+

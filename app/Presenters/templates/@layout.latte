@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>{ifset title}{include title|stripHtml} | {/ifset}NLM</title>
+	<link rel="stylesheet" href="{$basePath}/css/style.css">
+	{block scripts}
+		<script type="text/javascript" src="{$basePath}/js/live-form-validation.js"></script>
+		<script type="text/javascript" src="{$basePath}/js/jquery.min.js"></script>
+		<script type="text/javascript" src="{$basePath}/js/nette.ajax.js"></script>
+		<script type="text/javascript" src="{$basePath}/js/search.js"></script>
+		<script src="{$basePath}/js/main.js"></script>
+	{/block}
+</head>
+<body>
+	<header class="header"></header>
+	<div class="container-content">
+		{if $user->loggedIn}
+			<div class="main-navigation">
+				<ul class="navig">
+					<li><a n:href="Homepage:">Lines</a></li>
+					<li><a n:href="Device:">Devices</a></li>
+				</ul>
+				<ul class="navig right">
+					<li><a n:href="User:signOut">Sign out</a></li> 
+					{if $user->isInRole('admin')}<li><a n:href="User:">Users</a></li>{/if}
+					<li><a n:href="User:show $user->getId()">Account</a></li> 
+				</ul>
+			</div>
+
+
+		{/if}
+		<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
+		<div class="spinner-container"><div class="spinner"></div></div>
+		{include content}
+	</div>
+	<footer class="footer"><p>NLM</p><footer>	
+</body>
+
+</html>

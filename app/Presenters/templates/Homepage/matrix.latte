@@ -1,0 +1,149 @@
+{define lineAlerts}
+    {snippet lineAlerts}
+        <div class="container-alerts-allLines">
+            <h2>Current alerts:</h2>
+            {if count($line_alerts)>0}
+                <div class="alert">
+                    <div n:foreach="$line_alerts as $alert">{$alert}</div>
+                </div>
+
+                <div class="pagination">
+	                {if !$lineAlertsPaginator->isFirst()}
+		                <a n:href="redrawLineAlerts!, 1">1</a>
+		                &nbsp;|&nbsp;
+		                <a n:href="redrawLineAlerts!, $lineAlertsPaginator->page-1">&lt;</a>
+		                &nbsp;|&nbsp;
+	                {/if}
+
+	                {$lineAlertsPaginator->getPage()}/{$lineAlertsPaginator->getPageCount()}
+
+	                {if !$lineAlertsPaginator->isLast()}
+		                &nbsp;|&nbsp;
+		                <a n:href="redrawLineAlerts!, $lineAlertsPaginator->getPage() + 1">&gt;</a>
+		                &nbsp;|&nbsp;
+		                <a n:href="redrawLineAlerts!, $lineAlertsPaginator->getPageCount()">{$lineAlertsPaginator->getPageCount()}</a>
+	                {/if}
+                </div>
+            {else}
+                <div class="alert">
+                    <div>No alerts to show.</div>
+                </div>
+            {/if}
+        </div>
+    {/snippet}
+{/define}
+
+{define matrix}	
+
+    <a class="ajax refresh" n:href="refresh!">Refresh</a>
+    <a class="ajax save-matrix" n:href="saveMatrix!">Save matrix</a>
+
+    {snippet sla}
+
+        <div class="matrix">
+            {foreach range(1,count($lines_devices)) as $row}
+                <div class = "row">
+                    <div class = "header-row"><a n:href="Device:show $lines_devices[$row]">{$devices[$lines_devices[$row]]->hostname}</a></div>
+                    {foreach range(1,count($lines_devices)) as $col}
+                        <div class ="col">
+                            {if $row == 1}
+                                <div class = "header-col"><a n:href="Device:show $lines_devices[$col]">{$devices[$lines_devices[$col]]->hostname}</a></div>
+                            {/if}
+                            {if is_array($matrix[$row][$col])}
+                                <div class="data-point data">
+                                    <ul>
+                                    {foreach $matrix[$row][$col] as $line_id}
+                                        {if $lines[$line_id]->poll===1}
+                                            <li class="data-point {$line_id}">
+                                                {if $lines[$line_id]->sla_oper_type===2}<button class="edit-sla" id="{$line_id}">&#9998;</button>{/if}
+                                                <div><a n:href="Line:show $line_id">{$line_id}:</a></div>
+                                                <label>{$devices[$lines_devices[$row]]->hostname} > {$devices[$lines_devices[$col]]->hostname}</label>
+                   
+                                                {if $lines[$line_id]->sla_oper_type===2}
+                                                    {foreach $slas[$line_id] as $slaKey => $slaVal}
+                                                        <div class="sla-thresh-pair">
+                                                            {ifset $aliases[$slaKey]}
+                                                                <div class="sla {$line_id} {$slaKey}"><label>{$aliases[$slaKey]}: </label><div class="values">{$slaVal}</div></div>
+                                                            {/ifset}
+                                                            {ifset $linesToThresholds[$line_id][$slaKey]}
+                                                                <div class="threshold {$line_id} {$slaKey}">
+                                                                    {if $linesToThresholds[$line_id][$slaKey]['over_min'] === true}<div><label>&gt;</label>{$linesToThresholds[$line_id][$slaKey]['min']}</div>{/if}
+                                                                    {if $linesToThresholds[$line_id][$slaKey]['over_exact'] === true}<div><label>=</label>{$linesToThresholds[$line_id][$slaKey]['exact']}</div>{/if}
+                                                                    {if $linesToThresholds[$line_id][$slaKey]['over_max'] === true}<div><label>&lt;</label>{$linesToThresholds[$line_id][$slaKey]['max']}</div>{/if}
+                                                                </div>
+                                                            {/ifset}
+                                                        </div>
+                                                    {/foreach}
+                                                {else}
+                                                <div class="sla-thresh-pair">
+                                                    <div class="sla rtt_avg"><label>RTT[avg]: </label><div class="values">{$slas[$line_id]['rtt_avg']}</div></div>
+                                                    {ifset $linesToThresholds[$line_id]['rtt_avg']}
+                                                        <div class="threshold {$line_id} rtt_avg echo">
+                                                            {if $linesToThresholds[$line_id]['rtt_avg']['over_min'] === true}<div><label>&gt;</label>{$linesToThresholds[$line_id]['rtt_avg']['min']}</div>{/if}
+                                                            {if $linesToThresholds[$line_id]['rtt_avg']['over_exact'] === true}<div><label>=</label>{$linesToThresholds[$line_id]['rtt_avg']['exact']}</div>{/if}
+                                                            {if $linesToThresholds[$line_id]['rtt_avg']['over_max'] === true}<div><label>&lt;</label>{$linesToThresholds[$line_id]['rtt_avg']['max']}</div>{/if}
+                                                        </div>
+                                                    {/ifset}
+                                                </div>
+                                                {/if}
+                    
+                                            </li>
+                                        {/if}
+                                    {/foreach}
+                                    </ul>
+                                </div>
+
+                            {elseif array_key_exists($matrix[$row][$col],$slas)}
+                                <div class="data-point {$slas[$matrix[$row][$col]]->line_id}">
+                                    <a n:href="Line:show $slas[$matrix[$row][$col]]->line_id">{$slas[$matrix[$row][$col]]->line_id}:</a> 
+                                    <div class="sla-thresh-pair">
+                                        <div class="sla rtt_avg"><label>RTT[avg]: </label><div class="values">{$slas[$matrix[$row][$col]]->rtt_avg}</div></div>
+                                        {if $linesToThresholds[$slas[$matrix[$row][$col]]]}
+                                            <div class="threshold {$slas[$matrix[$row][$col]]->line_id} rtt_avg echo">
+                                                {if $linesToThresholds[$slas[$matrix[$row][$col]]->line_id]['rtt_avg']['over_min'] === true}<div><label>&gt;</label>{$linesToThresholds[$slas[$matrix[$row][$col]]->line_id]['rtt_avg']['min']}</div>{/if}
+                                                {if $linesToThresholds[$slas[$matrix[$row][$col]]->line_id]['rtt_avg']['over_exact'] === true}<div><label>=</label>{$linesToThresholds[$slas[$matrix[$row][$col]]->line_id]['rtt_avg']['exact']}</div>{/if}
+                                                {if $linesToThresholds[$slas[$matrix[$row][$col]]->line_id]['rtt_avg']['over_max'] === true}<div><label>&lt;</label>{$linesToThresholds[$slas[$matrix[$row][$col]]->line_id]['rtt_avg']['max']}</div>{/if}
+                                            </div>
+                                        {/if}
+                                    </div> 
+
+                                </div>
+                            {elseif $matrix[$row][$col] === 'x'}
+                                <div class="data-point-x data"></div>
+                            {elseif $matrix[$row][$col] === 'none'}
+                                <div class="data-point-null data"></div>
+                            {/if}
+                        </div>
+                    {/foreach}
+                </div>
+            {/foreach}
+        </div>
+
+        {include #lineAlerts}
+    {/snippet}
+    <div class="modal-edit-form"></div>
+    <script type="text/javascript" src="{$basePath}/js/matrix.js"></script>
+{/define}
+
+{define matrixNoLines}
+    <h1> No lines to show</h1>
+{/define}
+
+{block content}
+	<ul class="navig">
+		<li>{if $user->loggedIn}<a n:href="Line:add">Add new line</a>{/if}</li>
+        <li><a n:href="Homepage:">Lines overview</a></li>
+		<li><a n:href="Homepage:matrix">Matrix view</a></li>
+		<li><a n:href="Homepage:grid">Grid view</a></li>
+	</ul>
+    <h1 n:block="title">Lines matrix overview</h1>
+
+    {ifset $lines}
+        <div class="container-matrixview-row">
+            {include #matrix}
+        </div>
+    {/ifset}
+{/block}
+
+
+

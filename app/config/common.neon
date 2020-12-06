@@ -1,0 +1,38 @@
+parameters: 
+	config:
+		poll: 60
+		community: 'test'
+		path: '/var/www/network-line-mon/log/'
+		line:
+			path: 
+				log: '/var/www/network-line-mon/log/lines/'
+				rrd: '/var/www/network-line-mon/rrd/lines/'
+				graph: '/var/www/network-line-mon/www/graph/lines/'
+		device:
+			path: 
+				log: '/var/www/network-line-mon/log/devices/'
+				rrd: '/var/www/network-line-mon/rrd/devices/'
+				graph: '/var/www/network-line-mon/www/graph/devices/'
+		
+application:
+	errorPresenter: Error
+	mapping:
+		*: App\*Module\Presenters\*Presenter
+
+
+session:
+	expiration: 14 days
+	cookie_samesite: Strict
+di:
+	export:
+		parameters: no
+		tags: no
+
+services:
+	router: App\Router\RouterFactory::createRouter
+	- App\Model\UserManager
+	- App\Model\LineManager(%config.line.path%,%config.path%)
+	- App\Model\DeviceManager(%config.device.path%)
+	- App\Model\PollManager(%config.poll%,%config.line.path%,%config.device.path%,%config.path%,%config.community%)
+	- App\Model\SlaManager(%config.line.path%)
+	- App\Model\ThresholdManager

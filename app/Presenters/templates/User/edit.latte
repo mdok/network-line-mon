@@ -1,0 +1,8 @@
+{block content}
+    {if $user->isInRole('admin')}
+        <p><a n:href="User:default">← Back to users</a></p> 
+        <h1>Edit user: {$username}</h1>
+        {control editUserForm}
+    {/if}
+{/block}
+
