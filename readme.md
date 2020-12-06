@@ -3,6 +3,7 @@ About
  Network Line Monitor (NLM) is an application created to monitor IP SLA statistics on Cisco devices. Line in this context is used to describe logical connection between IP SLA source device and IP SLA responder device. Application allows you to periodically gather IP SLA statistics from devices via SNMP, store them in database, visualize them in form of graphs, setup threshold values for each statistic and generate alert in case of their contravention via user friendly GUI.
 
 Supported IP SLA operations: icmp echo, icmp jitter
+
 **NOTICE: Application is still in development.**
 
 
@@ -64,7 +65,7 @@ Installation
 
 	Open local.neon located in same directory and change the database password value to value you filled during atabase setup. (step 6)
 
-	** Do not change anything else inside the configuration files **
+	**Do not change anything else inside the configuration files**
 	
 
 8. Setup file permissions accordingly:
