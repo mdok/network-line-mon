@@ -33,11 +33,13 @@ Installation
 	cd /var/www
 	```
 	```
-	sudo git clone https://github.com/mdok/test.git
+	sudo git clone https://github.com/mdok/network-line-mon.git
 	```
 
 5. Run Composer update in project folder to install additional project dependencies:
-	Change dir to project
+	```
+	cd network-line-mon/
+	```
 	```
 	sudo composer update --no-plugins --no-scripts
 	```
@@ -60,15 +62,18 @@ Installation
 
 
 7. Modify configuration:
-	Open common.neon located in app/config/ directory of project and setup SNMP commmunity string (replace "test" with your community string) and poll interval (minimum allowed poll interval is 60s). Poll interval decides how often are new statistics gathered from devices and affects configuration of round robin database files for archivation of those statistics. Suggestion is to set this interval to minimum (but greater or eaqual 60s) of interval used in IP SLA configuration on devices.
+	Open common.neon located in app/config/ directory of project and setup SNMP commmunity string (replace "test" with your community string) and poll interval (minimum allowed poll interval is 60 s). Poll interval decides how often are new statistics gathered from devices and affects configuration of round robin database files for archivation of those statistics. Suggestion is to set this interval to minimum (but greater or eaqual 60 s) of interval used in IP SLA configuration on devices.
 	Keep in mind that the same interval will need to be setup for cron job for running scripts periodically in step 9, therefore chose the interval wisely according to possibilities of cron.
 
-	Open local.neon located in same directory and change the database password value to value you filled during atabase setup. (step 6)
+	Open local.neon located in same directory and change the database password value to value you filled during database setup. (step 6)
 
 	**Do not change anything else inside the configuration files**
 	
 
 8. Setup file permissions accordingly:
+	```
+	cd /var/www
+	```
 	```
  	sudo chown -R nlm /var/www/network-line-mon/
  	sudo chgrp -R www-data /var/www/network-line-mon/
@@ -89,7 +94,7 @@ Installation
 	```
 	
 	Insert following lines and change the execution interval to interval you set up for poll in step 7 (to decide on interval value you can use: https://crontab-generator.org/)
-	For default poll (value every 60s) leave the interval as it is.
+	For default poll (value every 60 s) leave the interval as it is.
 	```
 	* * * * * php /var/www/network-line-mon/bin/frequentSlaPoll.php >> /dev/null 2>&1
 	* * * * * php /var/www/network-line-mon/bin/frequentDevicePoll.php >> /dev/null 2>&1
@@ -103,7 +108,7 @@ Installation
 	
 	Append following to directory section of Apache configuration file:
 	```
-	sudo vi /etc/apache2/apache2.conf`
+	sudo vi /etc/apache2/apache2.conf
 	```
 	```
 	<Directory /var/www/network-line-mon>
