@@ -16,20 +16,30 @@ Installation
 	```
 
 2. Create user (future owner of project folder):
-	`sudo useradd nlm -d /var/lib/nlm -M -r -s /bin/bash`
+	```
+	sudo useradd nlm -d /var/lib/nlm -M -r -s /bin/bash
+	```
 
 3. Get Composer:
 	To install Composer follow steps from: https://getcomposer.org/download/ 
 	After instal run following command to enable global use of Composer:
-	`sudo mv ./composer.phar ~/bin/composer # or /usr/local/bin/composer`
+	```
+	sudo mv ./composer.phar ~/bin/composer # or /usr/local/bin/composer
+	```
 
 4. Copy project from github to /var/www/:
-	`cd /var/www`
-	`sudo git clone https://github.com/mdok/test.git`
+	```
+	cd /var/www
+	```
+	```
+	sudo git clone https://github.com/mdok/test.git
+	```
 
 5. Run Composer update in project folder to install additional project dependencies:
 	Change dir to project
-	`sudo composer update --no-plugins --no-scripts`
+	```
+	sudo composer update --no-plugins --no-scripts
+	```
 
 6. Prepare database:
 	Run folloving commands one by one:
@@ -73,7 +83,9 @@ Installation
 
 9. Setup cron job for cli scripts to run periodically:
 	
-	`sudo crontab -u www-data -e`
+	```
+	sudo crontab -u www-data -e
+	```
 	
 	Insert following lines and change the execution interval to interval you set up for poll in step 7 (to decide on interval value you can use: https://crontab-generator.org/)
 	For default poll (value every 60s) leave the interval as it is.
@@ -84,10 +96,14 @@ Installation
 
 10. Setup Apache2
 	Enable mod rewrite:
-	`sudo a2enmod rewrite`
+	```
+	sudo a2enmod rewrite
+	```
 	
 	Append following to directory section of Apache configuration file:
-	`sudo vi /etc/apache2/apache2.conf`
+	```
+	sudo vi /etc/apache2/apache2.conf`
+	```
 	```
 	<Directory /var/www/network-line-mon>
         Options Indexes FollowSymLinks
@@ -97,10 +113,14 @@ Installation
 	```
 
 	Change virtual host DocumentRoot to:
-	`DocumentRoot /var/www/network-line-mon/www`
+	```
+	DocumentRoot /var/www/network-line-mon/www
+	```
 
 	Finally restart apache:
-	`sudo service apache2 restart`
+	```
+	sudo service apache2 restart
+	```
 
 	**This is just quick start example. You can setup Apeche as you wish as long you use specified DocumentRoot and Directory setup.**
 
