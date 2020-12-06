@@ -3,15 +3,17 @@ About
  Network Line Monitor (NLM) is an application created to monitor IP SLA statistics on Cisco devices. Line in this context is used to describe logical connection between IP SLA source device and IP SLA responder device. Application allows you to periodically gather IP SLA statistics from devices via SNMP, store them in database, visualize them in form of graphs, setup threshold values for each statistic and generate alert in case of their contravention via user friendly GUI.
 
 Supported IP SLA operations: icmp echo, icmp jitter
-** NOTICE: Application is still in development. **
+**NOTICE: Application is still in development.**
 
 
 Installation
 ------------
-** Tested for Ubuntu server 20.04 and Apache2 **
+**Tested for Ubuntu server 20.04 and Apache2**
 
 1. Install dependencies:
-	sudo apt-get install rrdtool apache2 postgresql-12 php php-cli php-json php-common php-pear php-gd php-snmp php-pgsql php-rrd php-fpm git
+	```
+	sudo apt-get install rrdtool apache2 postgresql-12 php php-cli php-json php-common  php-pear php-gd php-snmp php-pgsql php-rrd php-fpm git
+	```
 
 2. Create user (future owner of project folder):
 	sudo useradd nlm -d /var/lib/nlm -M -r -s /bin/bash
